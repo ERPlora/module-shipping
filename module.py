@@ -33,3 +33,20 @@ PERMISSIONS = [
 'shipping.change_carrier',
 'shipping.manage_settings',
 ]
+
+ROLE_PERMISSIONS = {
+    "admin": ["*"],
+    "manager": [
+        "add_carrier",
+        "add_shipment",
+        "change_carrier",
+        "change_shipment",
+        "view_carrier",
+        "view_shipment",
+    ],
+    "employee": [
+        "add_shipment",
+        "view_carrier",
+        "view_shipment",
+    ],
+}
