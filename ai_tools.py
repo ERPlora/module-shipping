@@ -75,3 +75,78 @@ class CreateShipment(AssistantTool):
             status='pending',
         )
         return {"id": str(s.id), "reference": s.reference, "created": True}
+
+
+@register_tool
+class UpdateShipment(AssistantTool):
+    name = "update_shipment"
+    description = "Update a shipment's fields (carrier, tracking, status, dates, recipient, weight, notes)."
+    module_id = "shipping"
+    required_permission = "shipping.change_shipment"
+    requires_confirmation = True
+    parameters = {
+        "type": "object",
+        "properties": {
+            "shipment_id": {"type": "string", "description": "Shipment ID"},
+            "carrier_id": {"type": "string"},
+            "tracking_number": {"type": "string"},
+            "status": {"type": "string", "description": "pending, picked, in_transit, delivered, returned"},
+            "ship_date": {"type": "string", "description": "Date (YYYY-MM-DD)"},
+            "delivery_date": {"type": "string", "description": "Date (YYYY-MM-DD)"},
+            "recipient_name": {"type": "string"},
+            "recipient_address": {"type": "string"},
+            "weight": {"type": "string", "description": "Weight in kg"},
+            "notes": {"type": "string"},
+        },
+        "required": ["shipment_id"],
+        "additionalProperties": False,
+    }
+
+    def execute(self, args, request):
+        from decimal import Decimal
+        from shipping.models import Shipment
+        try:
+            s = Shipment.objects.get(id=args['shipment_id'])
+        except Shipment.DoesNotExist:
+            return {"error": f"Shipment {args['shipment_id']} not found"}
+        fields = ['updated_at']
+        for field in ('tracking_number', 'status', 'ship_date', 'delivery_date',
+                      'recipient_name', 'recipient_address', 'notes'):
+            if field in args:
+                setattr(s, field, args[field])
+                fields.append(field)
+        if 'carrier_id' in args:
+            s.carrier_id = args['carrier_id']
+            fields.append('carrier_id')
+        if 'weight' in args:
+            s.weight = Decimal(args['weight']) if args['weight'] else None
+            fields.append('weight')
+        s.save(update_fields=fields)
+        return {"id": str(s.id), "reference": s.reference, "updated": True}
+
+
+@register_tool
+class DeleteShipment(AssistantTool):
+    name = "delete_shipment"
+    description = "Delete a shipment by ID."
+    module_id = "shipping"
+    required_permission = "shipping.change_shipment"
+    requires_confirmation = True
+    parameters = {
+        "type": "object",
+        "properties": {
+            "shipment_id": {"type": "string", "description": "Shipment ID"},
+        },
+        "required": ["shipment_id"],
+        "additionalProperties": False,
+    }
+
+    def execute(self, args, request):
+        from shipping.models import Shipment
+        try:
+            s = Shipment.objects.get(id=args['shipment_id'])
+            reference = s.reference
+            s.delete()
+            return {"deleted": True, "reference": reference}
+        except Shipment.DoesNotExist:
+            return {"error": f"Shipment {args['shipment_id']} not found"}
