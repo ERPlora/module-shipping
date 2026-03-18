@@ -2,8 +2,8 @@ from django.utils.translation import gettext_lazy as _
 
 MODULE_ID = 'shipping'
 MODULE_NAME = _('Shipping & Delivery')
-MODULE_VERSION = '1.0.0'
-MODULE_ICON = 'car-outline'
+MODULE_VERSION = '1.0.1'
+MODULE_ICON = 'material:local_shipping'
 MODULE_DESCRIPTION = _('Shipping management, carriers and tracking')
 MODULE_AUTHOR = 'ERPlora'
 MODULE_CATEGORY = 'commerce'
