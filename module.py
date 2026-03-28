@@ -7,6 +7,7 @@ MODULE_ICON = 'material:local_shipping'
 MODULE_DESCRIPTION = _('Shipping management, carriers and tracking')
 MODULE_AUTHOR = 'ERPlora'
 MODULE_CATEGORY = 'commerce'
+HAS_MODELS = True
 
 MENU = {
     'label': _('Shipping & Delivery'),
